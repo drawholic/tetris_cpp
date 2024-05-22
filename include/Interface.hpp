@@ -8,15 +8,23 @@
 
 struct Interface
 {
+
+    sf::Clock clock;
+    sf::Time elapsed;
+
+    sf::Time elapsed1;
+    sf::Time elapsed2;
     Figure *figure;
     Field *field;
     sf::RenderWindow *window;
 
     sf::Font font;
+    sf::Text game_over_text;
     sf::Text title;
     sf::RectangleShape startbtn;
     sf::Text startText;
 
+    bool game_over_status = true;
     bool button_clicked = true;
     bool game_status = true;
     bool start_status = true;
@@ -59,6 +67,8 @@ struct Interface
                 start_status = false;
                 game_status = false;
                 window->close();
+                game_over_status = false;
+
                 break;
 
             case sf::Event::KeyPressed:
@@ -69,10 +79,20 @@ struct Interface
                     {
                         continue;
                     }
+                    if (check_for_intersect_left() || figure->isFigureAtBottom())
+                        continue;
+
                     figure->move_left();
+
+                    draw_and_display();
+
                     break;
                 case sf::Keyboard::Space:
+                    if (check_for_intersect() || figure->isFigureAtBottom())
+                        break;
+
                     figure->rotate();
+                    draw_and_display();
 
                     break;
                 case sf::Keyboard::D:
@@ -80,7 +100,12 @@ struct Interface
                     {
                         continue;
                     }
+                    if (check_for_intersect_right() || figure->isFigureAtBottom())
+                        continue;
                     figure->move_right();
+
+                    draw_and_display();
+
                     break;
                 case sf::Keyboard::S:
 
@@ -90,6 +115,8 @@ struct Interface
                         continue;
                     }
                     figure->move_down();
+
+                    draw_and_display();
 
                     break;
                 case sf::Keyboard::Escape:
@@ -105,7 +132,6 @@ struct Interface
             {
                 button_click_event_handle();
             }
-            // break;
         };
     }
 
@@ -122,6 +148,11 @@ struct Interface
         int title_width = 50 * 6;
         int title_height = 50;
         title.setPosition(
+            (SCR_WIDTH / 2.0f) - (title_width / 2.0f),
+            (SCR_HEIGHT / 4.0f) - (title_height / 2.0f));
+
+        game_over_text = sf::Text("GAME OVER", font, 50);
+        game_over_text.setPosition(
             (SCR_WIDTH / 2.0f) - (title_width / 2.0f),
             (SCR_HEIGHT / 4.0f) - (title_height / 2.0f));
 
@@ -149,10 +180,7 @@ struct Interface
     void start_loop()
     {
         init_text();
-        for (int i{0}; i <= 3; i++)
-        {
-            std::cout << get_random_figure() << '\n';
-        }
+
         while (start_status)
         {
             window_events_handle();
@@ -165,71 +193,100 @@ struct Interface
     }
     void game_over()
     {
-        game_status = false;
-        std::cerr << "Game Over" << std::endl;
-    }
-    void check_for_complete_row(int max_row = SQUARE_MAX_Y_POS)
-    {
-        // for (int curr_row_index = max_row; curr_row_index > SQUARE_MIN_Y_POS; curr_row_index -= SQUARE_SIDE)
-        // {
-        //     int count = 0;
-        //     for (int i = 0; i <= MAX_COL_INDEX; i++)
-        //     {
-        //         Square sq = Square(fieldPosition.x + SQUARE_SIDE * i, fieldPosition.y + SQUARE_SIDE * curr_row_index);
-        //         if (field->squares.count(sq))
-        //         {
-        //             count++;
-        //         }
-        //     }
-        //     if (count == 10)
-        //     {
-        //         for (int i = 0; i <= MAX_COL_INDEX; i++)
-        //         {
-        //             Square sq = Square(fieldPosition.x + SQUARE_SIDE * i, fieldPosition.y + SQUARE_SIDE * curr_row_index);
-        //             field->squares.erase(sq);
-        //         };
-
-        //     }
-        // }
-
-        for (int row = max_row; row >= 0; --row)
+        while (true)
         {
-            int row_count = 0;
-            for (const auto &sq : field->squares)
+            window_events_handle();
+            window->clear();
+            window->draw(game_over_text);
+            window->display();
+        }
+    }
+    void move_rows(int curr_row)
+    {
+        if (curr_row < 0)
+            return;
+        for (auto it = field->squares.begin(); it != field->squares.end();)
+        {
+            Square sq = *it;
+            if (sq.get_y() == fieldPosition.y + curr_row * SQUARE_SIDE)
             {
-                if (sq.get_y() == fieldPosition.y + row * SQUARE_SIDE)
-                {
-                    ++row_count;
-                }
+                it = field->squares.erase(it);
+                sq.move_down();
+                field->squares.insert(sq);
             }
-
-            if (row_count == 10)
+            else
             {
-                auto it = field->squares.begin();
-                while (it != field->squares.end())
-                {
-                    if (it->get_y() == fieldPosition.y + row * SQUARE_SIDE)
-                    {
-                        it = field->squares.erase(it);
-                    }
-                    else
-                    {
-                        ++it;
-                    }
-                }
-
-                for (auto &sq : field->squares)
-                {
-                    if (sq.get_y() <= fieldPosition.y + row * SQUARE_SIDE)
-                    {
-                        Square new_sq = sq;
-                        new_sq.move_down();
-                        field->squares.erase(sq);
-                        field->squares.insert(new_sq);
-                    }
-                }
+                ++it;
             }
         }
+        move_rows(curr_row - 1);
+    }
+
+    void check_for_complete_row(int curr_row = SQUARE_MAX_Y_POS)
+    {
+        if (curr_row < 0)
+            return;
+
+        int row_count = 0;
+        for (const auto &sq : field->squares)
+        {
+            if (sq.get_y() == fieldPosition.y + curr_row * SQUARE_SIDE)
+            {
+                row_count++;
+            }
+        }
+
+        if (row_count == 10)
+        {
+            for (auto it = field->squares.begin(); it != field->squares.end();)
+            {
+                if (it->get_y() == fieldPosition.y + curr_row * SQUARE_SIDE)
+                {
+                    it = field->squares.erase(it); // erase returns the next iterator
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            move_rows(curr_row - 1);
+        }
+
+        check_for_complete_row(curr_row - 1);
+    }
+
+    bool is_full_cycle_rate()
+    {
+        elapsed = clock.getElapsedTime();
+        if (elapsed.asMilliseconds() > MAX_CLOCK_VALUE)
+        {
+            clock.restart();
+            return true;
+        }
+
+        return false;
+    }
+
+    void draw_and_display()
+    {
+        draw_field();
+        draw_squares();
+        figure->draw_figure(window);
+
+        window->display();
+    };
+
+    bool check_for_intersect_start_position()
+    {
+        for (const auto &sq : figure->squares)
+        {
+            if (field->squares.count(sq))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void game_loop()
@@ -237,9 +294,15 @@ struct Interface
         window->setKeyRepeatEnabled(false);
         seed_rng();
         figure->set_random_figure();
+
         while (game_status)
         {
             window_events_handle();
+
+            if (!is_full_cycle_rate())
+            {
+                continue;
+            }
 
             if (figure->isFigureAtBottom() || check_for_intersect())
             {
@@ -247,21 +310,22 @@ struct Interface
                 check_for_complete_row();
 
                 figure->set_random_figure();
+                if (check_for_intersect_start_position())
+                {
+                    game_over();
+                    return;
+                }
                 continue;
             }
+
             window->clear();
 
             // MOVE FIGURE
 
             figure->move_down();
 
-            draw_field();
-            draw_squares();
-            figure->draw_figure(window);
-
-            window->display();
-
-            sf::sleep(sf::milliseconds(500));
+            draw_and_display();
+            clock.restart();
         }
     }
 
@@ -304,6 +368,32 @@ struct Interface
         }
     }
 
+    bool check_for_intersect_right()
+    {
+        for (const auto &sq : figure->squares)
+        {
+            Square bottom_square(sq);
+            bottom_square.move_right();
+            if (field->squares.count(bottom_square))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    bool check_for_intersect_left()
+    {
+        for (const auto &sq : figure->squares)
+        {
+            Square bottom_square(sq);
+            bottom_square.move_left();
+            if (field->squares.count(bottom_square))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     bool check_for_intersect()
     {
         for (const auto &sq : figure->squares)

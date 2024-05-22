@@ -4,8 +4,12 @@
 #include <random>
 #include <ctime>
 
+const int MAX_CLOCK_VALUE = 500;
+
+int CURRENT_CLOCK_VALUE;
+
 const int MAX_ROW_INDEX = 18;
-const int MAX_COL_INDEX = 10;
+const int MAX_COL_INDEX = 9;
 
 const int SCR_HEIGHT = 1000;
 const int SCR_WIDTH = 700;

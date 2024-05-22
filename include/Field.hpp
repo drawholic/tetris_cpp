@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 struct Field
 {
+    
     std::unordered_set<Square, SquareHash> squares;
     sf::RectangleShape *shape;
     Field()

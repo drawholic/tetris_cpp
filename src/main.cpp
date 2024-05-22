@@ -8,6 +8,6 @@ int main()
     Interface interface(&window);
     interface.start_loop();
     interface.game_loop();
-
+    interface.game_over();
     return 0;
 }

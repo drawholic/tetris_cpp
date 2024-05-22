@@ -64,6 +64,10 @@ struct Square
     {
         shape.setPosition(shape.getPosition().x, shape.getPosition().y + SQUARE_SIDE);
     }
+    void move_top()
+    {
+        shape.setPosition(shape.getPosition().x, shape.getPosition().y - SQUARE_SIDE);
+    }
     void move_left()
     {
         shape.setPosition(shape.getPosition().x - SQUARE_SIDE, shape.getPosition().y);

@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <SFML/Graphics.hpp>
 #include <iostream>
-const sf::Vector2f figure_start_pos(fieldPosition.x + 5 * SQUARE_SIDE, fieldPosition.y - 5 * SQUARE_SIDE);
+const sf::Vector2f figure_start_pos(fieldPosition.x + 5 * SQUARE_SIDE, fieldPosition.y - 4 * SQUARE_SIDE);
 
 enum FigureType
 {
@@ -24,6 +24,18 @@ struct Figure
     sf::Color color;
     Figure() : color(sf::Color::Red){};
 
+    void move_top()
+    {
+        std::unordered_set<Square, SquareHash> new_squares;
+        for (auto it = squares.begin(); it != squares.end(); it++)
+        {
+            Square newSquare(*it);
+            newSquare.color = it->color;
+            newSquare.move_top();
+            new_squares.insert(newSquare);
+        };
+        squares = std::move(new_squares);
+    }
     void move_down()
     {
         std::unordered_set<Square, SquareHash> new_squares;
@@ -165,6 +177,18 @@ struct Figure
         }
 
         squares = std::move(new_squares);
+        while (isMaxX())
+        {
+            move_left();
+        };
+        while (isMinX())
+        {
+            move_right();
+        }
+        while (isMaxY())
+        {
+            move_top();
+        }
     }
 
     void insert_square(Square &sq)
