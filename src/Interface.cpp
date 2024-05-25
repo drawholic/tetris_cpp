@@ -5,8 +5,6 @@ void seed_rng()
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 };
 
-
-
 Interface::Interface(sf::RenderWindow *window)
     : window(window)
 {
@@ -97,6 +95,8 @@ void Interface::window_events_handle()
             case sf::Keyboard::Escape:
                 start_status = false;
                 game_status = false;
+                game_over_status = false;
+
                 window->close();
                 exit(0);
                 break;
