@@ -7,13 +7,10 @@
 #include <SFML/Graphics.hpp>
 struct Field
 {
-    
+
     std::unordered_set<Square, SquareHash> squares;
     sf::RectangleShape *shape;
-    Field()
-    {
-        shape = new sf::RectangleShape(sf::Vector2f(FIELD_WIDTH, FIELD_HEIGHT));
-    }
+    Field();
     auto begin()
     {
         return squares.begin();
@@ -21,7 +18,7 @@ struct Field
     auto end()
     {
         return squares.end();
-    }
+    };
 };
 
 #endif

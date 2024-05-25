@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.5)
 
 project(tetris)
 
-
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
-
-add_executable(main src/main.cpp)
 include_directories(include)
+
+add_executable(main src/main.cpp src/Field.cpp src/Figure.cpp src/Square.cpp src/Interface.cpp
+# src/another.cpp 
+)
 
 target_link_libraries(
     main

@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "utilities.hpp"
 #include "Interface.hpp"
+#include "another.cpp"
 
 int main()
 {

@@ -8,84 +8,30 @@ struct Square
 {
     sf::Color color = sf::Color::Red;
     sf::RectangleShape shape;
-    Square(int x, int y)
-    {
-        shape.setPosition(x, y);
-    };
-    Square(Square &&sq) noexcept
-    {
-        shape.setPosition(sq.shape.getPosition());
-    };
+    Square(int x, int y);
+    Square(Square &&sq) noexcept;
     Square(Square &sq)
     {
         shape.setPosition(sq.shape.getPosition());
     };
-    Square(const Square &sq)
-    {
-        shape.setPosition(sq.shape.getPosition());
-        shape.setSize(sq.shape.getSize());
-        color = sq.color;
-    }
-    Square &operator=(const Square &sq)
-    {
-        if (this == &sq)
-            return *this;
-        shape.setPosition(sq.shape.getPosition());
-        shape.setSize(sq.shape.getSize());
-        color = sq.color;
-        return *this;
-    }
-    Square &operator=(Square &&sq) noexcept
-    {
-        if (this == &sq)
-            return *this;
-        shape.setPosition(sq.shape.getPosition());
-        shape.setSize(sq.shape.getSize());
-        color = sq.color;
-        return *this;
-    }
-    bool operator==(const Square &other) const
-    {
-        return get_x() == other.get_x() && get_y() == other.get_y();
-    }
-    bool operator==(Square &other) const
-    {
-        return get_x() == other.get_x() && get_y() == other.get_y();
-    }
-    int get_x() const
-    {
-        return shape.getPosition().x;
-    };
-    int get_y() const
-    {
-        return shape.getPosition().y;
-    };
-    void move_down()
-    {
-        shape.setPosition(shape.getPosition().x, shape.getPosition().y + SQUARE_SIDE);
-    }
-    void move_top()
-    {
-        shape.setPosition(shape.getPosition().x, shape.getPosition().y - SQUARE_SIDE);
-    }
-    void move_left()
-    {
-        shape.setPosition(shape.getPosition().x - SQUARE_SIDE, shape.getPosition().y);
-    }
-    void move_right()
-    {
-        shape.setPosition(shape.getPosition().x + SQUARE_SIDE, shape.getPosition().y);
-    }
+    Square(const Square &sq);
+    Square &operator=(const Square &sq);
+    Square &operator=(Square &&sq) noexcept;
+    bool operator==(const Square &other) const;
+    bool operator==(Square &other) const;
+    int get_x() const;
+    int get_y() const;
+    void move_down();
+    void move_top();
+    void move_left();
+    void move_right();
+
+    void init_square();
 };
 
 struct SquareHash
 {
-    std::size_t operator()(const Square &s) const noexcept
-    {
-        std::size_t hx = std::hash<int>()(s.get_x());
-        std::size_t hy = std::hash<int>()(s.get_y());
-        return hx ^ (hy << 1);
-    }
+    std::size_t operator()(const Square &s) const noexcept;
 };
 
 #endif
